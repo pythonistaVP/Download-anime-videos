@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download anime videos — расширение для скачивания аниме с yummyanime.tv</title>
+<meta name="description" content="Расширение для Chrome (Manifest V3): скачивайте целый сезон аниме с yummyanime.tv в один клик — любая студия и озвучка, которая есть на сайте, выбор качества, отдельные файлы или один ZIP-архив. Работает только на yummyanime.tv. Создано только для личного офлайн-просмотра — аниме себе в дорогу.">
+<meta name="theme-color" content="#0e0f14">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Download anime videos — скачивание аниме с yummyanime.tv в один клик">
+<meta property="og:description" content="Выбираете озвучку, качество и серии — получаете отдельные файлы или один ZIP. Расширение для Chromium, Manifest V3, MIT.">
+<meta property="og:image" content="https://user.uploads.dev/file/15d0e96d36864d6ace1556b6a635e7e7.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/icons/icon128.png">
+<link rel="apple-touch-icon" href="assets/icons/icon128.png">
+<style>
+:root {
+    --bg: #0e0f14;
+    --panel: #17181d;
+    --panel-2: #101116;
+    --border: rgba(255, 255, 255, 0.09);
+    --border-2: rgba(255, 255, 255, 0.16);
+    --text: #e8e9f4;
+    --muted: #9aa0c0;
+    --accent: #e0457b;
+    --accent-2: #7b3fe4;
+    --grad: linear-gradient(135deg, #e0457b, #7b3fe4);
+    --good: #6ee7a8;
+    --warn: #f5b450;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    text-align: left;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(760px 420px at 8% -6%, rgba(224, 69, 123, 0.22), transparent 70%),
+      radial-gradient(720px 460px at 96% 8%, rgba(123, 63, 228, 0.20), transparent 72%);
+  }
+  .container { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: 0 22px; }
+  a { color: #ff9dbf; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.92em;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 7px;
+    white-space: nowrap;
+  }
+  h2 { font-size: clamp(23px, 3.2vw, 33px); line-height: 1.15; margin: 0 0 10px; letter-spacing: -0.02em; }
+  h3 { margin: 0 0 6px; font-size: 17px; }
+  p { margin: 0 0 12px; }
+  .lead { color: var(--muted); max-width: 780px; margin-bottom: 26px; }
+  .grad-text {
+    background: linear-gradient(90deg, #ff77a9, #a98bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    background: rgba(14, 15, 20, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 64px; flex-wrap: wrap; padding: 8px 0; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand .name { font-size: 15.5px; }
+  .brand .ver { color: var(--muted); font-weight: 500; font-size: 12px; border: 1px solid var(--border-2); border-radius: 999px; padding: 2px 9px; }
+  .logo { width: 34px; height: 34px; border-radius: 10px; background: var(--grad); display: grid; place-items: center; flex: 0 0 auto; box-shadow: 0 6px 18px rgba(224, 69, 123, 0.32); }
+  .logo svg { width: 20px; height: 20px; display: block; }
+  .top-links { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    border-radius: 12px; padding: 12px 18px;
+    font-size: 15px; font-weight: 600; line-height: 1;
+    border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+    transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .btn:hover { text-decoration: none; transform: translateY(-1px); }
+  .btn svg { width: 17px; height: 17px; flex: 0 0 auto; }
+  .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 12px 30px rgba(224, 69, 123, 0.3); }
+  .btn-primary:hover { box-shadow: 0 16px 38px rgba(224, 69, 123, 0.42); }
+  .btn-ghost { background: rgba(255, 255, 255, 0.05); border-color: var(--border-2); color: var(--text); }
+  .btn-ghost:hover { background: rgba(255, 255, 255, 0.09); }
+  .btn-sm { padding: 9px 14px; font-size: 13.5px; border-radius: 10px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 66px 0 44px; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 46px; align-items: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: #ffa2c4; background: rgba(224, 69, 123, 0.14);
+    border: 1px solid rgba(224, 69, 123, 0.5); border-radius: 999px; padding: 6px 14px;
+  }
+  .badge .dot-live { width: 7px; height: 7px; border-radius: 50%; background: #ff5f9e; box-shadow: 0 0 0 0 rgba(255, 95, 158, 0.7); animation: ping 2s infinite; }
+  @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(255, 95, 158, 0.55); } 70% { box-shadow: 0 0 0 9px rgba(255, 95, 158, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 95, 158, 0); } }
+  .hero h1 { font-size: clamp(30px, 4.4vw, 50px); line-height: 1.06; letter-spacing: -0.03em; margin: 20px 0 0; }
+  .hero .sub { color: var(--muted); font-size: clamp(15.5px, 1.6vw, 18px); margin-top: 16px; max-width: 560px; }
+  .hero .sub b { color: var(--text); font-weight: 600; }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 22px; }
+  .chip {
+    font-size: 12.5px; color: #d6d8ea; background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border); border-radius: 999px; padding: 6px 13px; display: inline-flex; align-items: center; gap: 7px;
+  }
+  .chip svg { width: 14px; height: 14px; }
+
+  /* ---------- mock manager ---------- */
+  .mock { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: 0 34px 90px rgba(0, 0, 0, 0.55); }
+  .mock-bar { display: flex; align-items: center; gap: 8px; padding: 12px 15px; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--border); }
+  .mock-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
+  .mock-bar .t { margin-left: 7px; color: var(--muted); font-size: 12px; }
+  .mock-body { padding: 17px; }
+  .mock-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .mock-head .a { font-weight: 700; font-size: 15px; line-height: 1.3; }
+  .mock-head .b { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .mock-tag { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: rgba(123, 63, 228, 0.22); border: 1px solid rgba(169, 139, 255, 0.5); color: #c8b6ff; white-space: nowrap; }
+  .mock-row { border: 1px solid var(--border); background: rgba(255, 255, 255, 0.04); border-radius: 12px; padding: 11px 13px; margin-bottom: 9px; }
+  .mock-row .rt { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; font-weight: 600; }
+  .mock-row .rs { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .mock-q { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(224, 69, 123, 0.5); color: #ff9dbf; background: rgba(224, 69, 123, 0.14); white-space: nowrap; }
+  .mock-q.ok { border-color: rgba(110, 231, 168, 0.5); color: var(--good); background: rgba(63, 185, 120, 0.16); }
+  .pbar { height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.09); margin-top: 9px; overflow: hidden; }
+  .pbar > i { display: block; height: 100%; border-radius: 999px; background: var(--grad); }
+  .pbar > i.live { background-image: linear-gradient(90deg, #e0457b, #7b3fe4, #e0457b); background-size: 200% 100%; animation: slide 2.4s linear infinite; }
+  @keyframes slide { from { background-position: 0 0; } to { background-position: 200% 0; } }
+  .mock-foot { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 13px; }
+  .mock-foot .fr { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); }
+  .mock-foot .fr b { color: #ff9dbf; }
+  .mock-btn { margin-top: 12px; text-align: center; background: var(--grad); border-radius: 11px; padding: 11px; font-weight: 700; font-size: 14px; color: #fff; }
+
+  /* ---------- sections ---------- */
+  section { padding: 46px 0; }
+  .section-tight { padding: 24px 0; }
+
+  .warn {
+    display: flex; gap: 15px; align-items: flex-start;
+    border: 1px solid rgba(245, 180, 80, 0.38); background: rgba(245, 180, 80, 0.07);
+    border-radius: var(--radius); padding: 18px 20px;
+  }
+  .warn .wi { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; background: rgba(245, 180, 80, 0.16); display: grid; place-items: center; }
+  .warn .wi svg { width: 19px; height: 19px; }
+  .warn h3 { color: #ffcd7a; font-size: 16px; margin-bottom: 4px; }
+  .warn p { color: #e6d9c4; font-size: 14.5px; margin: 0; }
+  .warn .small { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(255px, 100%), 1fr)); gap: 15px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 19px; transition: border-color 0.2s ease, transform 0.15s ease; }
+  .card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+  .card .ico { width: 40px; height: 40px; border-radius: 12px; background: rgba(123, 63, 228, 0.16); border: 1px solid rgba(169, 139, 255, 0.28); display: grid; place-items: center; margin-bottom: 13px; }
+  .card .ico svg { width: 20px; height: 20px; }
+  .card p { color: var(--muted); font-size: 14px; margin: 0; }
+
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); gap: 15px; counter-reset: s; }
+  .step { position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 19px 19px 19px 19px; }
+  .step .num {
+    width: 30px; height: 30px; border-radius: 9px; background: var(--grad); color: #fff;
+    display: grid; place-items: center; font-weight: 700; font-size: 14px; margin-bottom: 12px;
+  }
+  .step h3 { font-size: 15.5px; }
+  .step p { color: var(--muted); font-size: 13.5px; margin: 0; }
+
+  .install { counter-reset: i; display: grid; gap: 12px; }
+  .install .i { display: flex; gap: 14px; align-items: flex-start; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 15px 17px; }
+  .install .i .n { counter-increment: i; flex: 0 0 auto; width: 26px; height: 26px; border-radius: 8px; background: rgba(224, 69, 123, 0.16); border: 1px solid rgba(224, 69, 123, 0.45); color: #ffa2c4; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  .install .i .n::before { content: counter(i); }
+  .install .i p { margin: 0; font-size: 14.5px; }
+  .install .i .hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  .two-col { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 34px; align-items: start; }
+  ul.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  ul.checks li { display: flex; gap: 11px; align-items: flex-start; font-size: 14.5px; color: #d6d8ea; }
+  ul.checks li .ci { flex: 0 0 auto; margin-top: 3px; width: 18px; height: 18px; border-radius: 6px; background: rgba(110, 231, 168, 0.14); border: 1px solid rgba(110, 231, 168, 0.4); display: grid; place-items: center; }
+  ul.checks li .ci svg { width: 11px; height: 11px; }
+  ul.checks.cross li .ci { background: rgba(255, 122, 122, 0.12); border-color: rgba(255, 122, 122, 0.38); }
+
+  /* ---------- demo ---------- */
+  .demo-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 20px; }
+  .demo-form { display: flex; gap: 10px; flex-wrap: wrap; }
+  .demo-form input {
+    flex: 1 1 320px; min-width: 0; background: var(--panel-2); border: 1px solid var(--border-2);
+    color: var(--text); font-size: 14.5px; font-family: inherit; padding: 13px 14px; border-radius: 12px;
+  }
+  .demo-form input:focus { outline: none; border-color: rgba(224, 69, 123, 0.65); box-shadow: 0 0 0 3px rgba(224, 69, 123, 0.16); }
+  .demo-hint { color: var(--muted); font-size: 12.5px; margin-top: 9px; }
+  .status { display: none; align-items: center; gap: 11px; margin-top: 16px; color: var(--muted); font-size: 14px; }
+  .status.on { display: flex; }
+  .status.err { color: #ffb1b1; }
+  .spinner { width: 17px; height: 17px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.16); border-top-color: #ff9dbf; animation: spin 0.8s linear infinite; flex: 0 0 auto; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result { display: none; margin-top: 20px; }
+  .result.on { display: block; }
+  .res-top { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; }
+  .poster { width: 100%; aspect-ratio: 2 / 3; border-radius: 14px; object-fit: cover; background: linear-gradient(135deg, rgba(224, 69, 123, 0.25), rgba(123, 63, 228, 0.25)); border: 1px solid var(--border); display: block; }
+  .res-title { font-size: 20px; font-weight: 700; line-height: 1.25; }
+  .res-meta { display: flex; gap: 7px; flex-wrap: wrap; margin: 10px 0; }
+  .res-desc { color: var(--muted); font-size: 13.5px; display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .subhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 22px 0 10px; flex-wrap: wrap; }
+  .subhead h3 { margin: 0; font-size: 15.5px; }
+  .subhead .note { color: var(--muted); font-size: 12.5px; }
+  .dubs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .dub {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-family: inherit;
+    border: 1px solid var(--border-2); background: rgba(255, 255, 255, 0.04); color: var(--text);
+    border-radius: 999px; padding: 8px 13px; cursor: pointer; transition: all 0.15s ease;
+  }
+  .dub:hover { background: rgba(255, 255, 255, 0.09); }
+  .dub .n { color: var(--muted); font-size: 11.5px; }
+  .dub.on { border-color: rgba(224, 69, 123, 0.75); background: rgba(224, 69, 123, 0.18); }
+  .dub.off { opacity: 0.5; border-style: dashed; cursor: not-allowed; }
+  .dub.off:hover { background: rgba(255, 255, 255, 0.04); }
+  .quals { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .qual { border: 1px solid var(--border-2); background: rgba(255, 255, 255, 0.04); color: var(--text); border-radius: 10px; padding: 8px 13px; font-size: 13.5px; font-weight: 600; font-family: inherit; cursor: pointer; }
+  .qual.on { background: var(--grad); border-color: transparent; color: #fff; }
+  .estimate { display: grid; gap: 6px; margin-top: 14px; font-size: 13.5px; color: var(--muted); }
+  .estimate b { color: var(--text); }
+  .fname { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; color: #c8b6ff; word-break: break-all; }
+  .alt { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+
+  .faq { display: grid; gap: 10px; }
+  details.qa { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px 17px; }
+  details.qa summary { cursor: pointer; font-weight: 600; font-size: 15px; list-style: none; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+  details.qa summary::-webkit-details-marker { display: none; }
+  details.qa summary::after { content: "+"; color: #ff9dbf; font-size: 19px; font-weight: 700; line-height: 1; }
+  details.qa[open] summary::after { content: "–"; }
+  details.qa p { color: var(--muted); font-size: 14px; margin: 10px 0 0; }
+
+  footer { border-top: 1px solid var(--border); padding: 34px 0 46px; margin-top: 30px; }
+  .foot-grid { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .foot-grid > div:first-child { flex: 1 1 360px; min-width: 0; }
+  .foot-links { display: flex; gap: 20px; flex-wrap: wrap; font-size: 14px; }
+  .foot-note { color: var(--muted); font-size: 13px; margin-top: 18px; max-width: 820px; }
+
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; }
+    .two-col { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .hero { padding: 44px 0 30px; }
+    section { padding: 36px 0; }
+  }
+  @media (max-width: 620px) {
+    .res-top { grid-template-columns: minmax(0, 1fr); }
+    .poster { max-width: 190px; }
+    .brand .name { font-size: 14.5px; }
+    .cta .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="container topbar-inner">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v11" /><path d="M7.5 10.5 12 15l4.5-4.5" /><path d="M4.5 19h15" />
+        </svg>
+      </span>
+      <span class="name">Download anime videos</span>
+      <span class="ver">v1.0.0</span>
+    </div>
+    <nav class="top-links">
+      <a class="btn btn-ghost btn-sm" href="#demo">Живое демо</a>
+      <a class="btn btn-ghost btn-sm" href="https://github.com/pythonistaVP/Download-anime-videos" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn btn-primary btn-sm" href="Download-anime-videos-v1.0.0.zip" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v11" /><path d="M7.5 10.5 12 15l4.5-4.5" /><path d="M4.5 19h15" />
+        </svg>
+        Скачать .zip
+      </a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="badge"><span class="dot-live"></span> Расширение для Chrome · Manifest V3</span>
+      <h1>Download <span class="grad-text">anime</span> videos</h1>
+      <p class="sub">
+        Скачивайте <b>целый сезон аниме с yummyanime.tv в один клик</b>: выберите студию и озвучку, которая есть на сайте,
+        нужные серии, качество — и получите <b>отдельные файлы или один ZIP-архив</b>.
+      </p>
+      <div class="cta">
+        <a class="btn btn-primary" href="Download-anime-videos-v1.0.0.zip" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v11" /><path d="M7.5 10.5 12 15l4.5-4.5" /><path d="M4.5 19h15" />
+          </svg>
+          Скачать расширение (.zip)
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/pythonistaVP/Download-anime-videos" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.55v-1.94c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.3-1.7-1.3-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .3.2.66.8.55A11.5 11.5 0 0 0 23.5 12A11.5 11.5 0 0 0 12 .5Z"/></svg>
+          Исходный код
+        </a>
+      </div>
+      <div class="chips">
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+          Работает только на yummyanime.tv
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a98bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h10" /></svg>
+          Любая студия и озвучка
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ff9dbf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="M7 10l5 5 5-5" /><path d="M4 20h16" /></svg>
+          Качество до 1080p
+        </span>
+        <span class="chip">MIT · без рекламы и слежки</span>
+      </div>
+    </div>
+
+    <div class="mock" aria-hidden="true">
+      <div class="mock-bar">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="t">Менеджер загрузок — Download anime videos</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-head">
+          <div>
+            <div class="a">Реинкарнация безработного 3</div>
+            <div class="b">Сезон 1 · 12 серий · Озвучка ТО Дубляжная · 720p</div>
+          </div>
+          <span class="mock-tag">ZIP</span>
+        </div>
+        <div class="mock-row">
+          <div class="rt"><span>Серия 01 · 720p</span><span class="mock-q ok">готово</span></div>
+          <div class="pbar"><i style="width:100%"></i></div>
+        </div>
+        <div class="mock-row">
+          <div class="rt"><span>Серия 02 · 720p</span><span class="mock-q">12,4 МБ/с</span></div>
+          <div class="rs">Осталось ~40 сек</div>
+          <div class="pbar"><i class="live" style="width:64%"></i></div>
+        </div>
+        <div class="mock-row">
+          <div class="rt"><span>Серия 03 · 720p</span><span class="mock-q">в очереди</span></div>
+          <div class="pbar"><i style="width:12%"></i></div>
+        </div>
+        <div class="mock-row">
+          <div class="rt"><span>Серия 04 · 720p</span><span class="mock-q">в очереди</span></div>
+          <div class="pbar"><i style="width:0%"></i></div>
+        </div>
+        <div class="mock-foot">
+          <div class="fr"><span>Общий прогресс</span><b>7 из 12 серий · 58%</b></div>
+          <div class="pbar"><i style="width:58%"></i></div>
+          <div class="mock-btn">Скачать сезон 1</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-tight">
+  <div class="container">
+    <div class="warn">
+      <span class="wi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f5b450" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 9v4" /><path d="M12 17h.01" /><path d="M10.3 3.6 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z" />
+        </svg>
+      </span>
+      <div>
+        <h3>Только для личного просмотра</h3>
+        <p>Расширение создано только для того, чтобы скачивать аниме себе в дорогу — смотреть офлайн, без интернета, в личных целях. Скачанные файлы нельзя выкладывать в открытый доступ, перезаливать на другие сайты, раздавать или продавать. Все права на аниме принадлежат их правообладателям, а расширение лишь удобно сохраняет то, что сайт и так отдаёт в плеере.</p>
+        <p class="small">Расширение не обходит защиту, не ломает платный доступ и не качает то, что сайт не отдаёт в плеере. Оно просто аккуратно сохраняет поток, который вы и так можете смотреть — чтобы посмотреть его в дороге без интернета.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Что умеет</h2>
+    <p class="lead">Расширение не «качает видео со страницы», а честно повторяет то, что делает плеер: достаёт прямые ссылки у Kodik, тянет HLS-поток по сегментам и собирает из них обычный MP4.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a98bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z" /><path d="M9 9l5 3-5 3z" /></svg>
+        </div>
+        <h3>Весь сезон в один клик</h3>
+        <p>Открыли страницу аниме — на ней появилась кнопка «Скачать сезон». Один запуск — и весь сезон качается фоном.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ff9dbf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10" /><path d="M8 11l4 4 4-4" /><path d="M5 19h14" /></svg>
+        </div>
+        <h3>Любая озвучка, которая есть</h3>
+        <p>Список студий и озвучек берётся прямо из сайта: ТО Дубляжная, AniLibria, AnimeVost, AniStar, субтитры — всё, что реально доступно для этого аниме.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" /></svg>
+        </div>
+        <h3>Выбор качества</h3>
+        <p>Показываем все качества, которые отдаёт плеер (360p, 480p, 720p, 1080p), и примерный размер файла до старта.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffcd7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10v10H4z" /><path d="M14 10h3l3 3v4h-6z" /></svg>
+        </div>
+        <h3>Файлы или один ZIP</h3>
+        <p>Сохраняйте серии по отдельности — или упакуйте весь сезон в один ZIP-архив, чтобы удобно забрать с собой.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#8ab4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h9l4 4v12H6z" /><path d="M9 12h6" /><path d="M9 16h4" /></svg>
+        </div>
+        <h3>Понятные имена файлов</h3>
+        <p>«Реинкарнация безработного 3 — S01E04 — ТО Дубляжная — 720p.mp4». Настраиваемый шаблон имени, папка по сезону, пропуск уже скачанного.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a98bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="M7 10l5 5 5-5" /><path d="M4 20h16" /></svg>
+        </div>
+        <h3>Настоящий менеджер</h3>
+        <p>Очередь, прогресс, скорость, ETA, пауза/продолжить, отмена, повтор упавших серий и живой лог — всё в отдельной вкладке.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="two-col">
+      <div>
+        <h2>Как это работает</h2>
+        <p class="lead">Никакой магии и обхода защит — только тот поток, который сайт сам отдаёт вашему браузеру.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="num">1</div>
+            <h3>Открываете аниме на yummyanime.tv</h3>
+            <p>Расширение читает страницу, находит название и по нему определяет аниме в каталоге сайта.</p>
+          </div>
+          <div class="step">
+            <div class="num">2</div>
+            <h3>Выбираете параметры</h3>
+            <p>Озвучка/студия, качество, диапазон серий и формат: отдельные файлы или один ZIP.</p>
+          </div>
+          <div class="step">
+            <div class="num">3</div>
+            <h3>Расширение достаёт поток</h3>
+            <p>У плеера Kodik запрашиваются прямые ссылки, затем HLS-манифест разбивается на сегменты и они тянутся параллельно.</p>
+          </div>
+          <div class="step">
+            <div class="num">4</div>
+            <h3>Собирается MP4 и сохраняется</h3>
+            <p>Сегменты склеиваются в обычный MP4 без перекодирования — то же качество, что в плеере, только файлом на диске.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h2>Что нужно знать</h2>
+        <p class="lead">Ограничения честные — лучше узнать о них заранее.</p>
+        <ul class="checks">
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span> Chrome, Edge, Brave, Opera, Яндекс.Браузер (любой Chromium, Manifest V3).</li>
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span> Скачивание может идти в фоне — можно закрыть вкладку с аниме, менеджер продолжит.</li>
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span> Куда сохранять — выбираете вы (папка через File System Access API или загрузки браузера).</li>
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span> Настройки хранятся локально в вашем браузере. Никаких аккаунтов и отправки данных на сторонние сервера.</li>
+        </ul>
+        <ul class="checks cross" style="margin-top:14px">
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> Озвучки, которые сайт отдаёт через плеер alloha, недоступны — расширение помечает их как неподдерживаемые.</li>
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> Качество — ровно то, что отдаёт плеер. Апскейла и перекодирования нет.</li>
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> DRM-защищённые источники не поддерживаются.</li>
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> Работает только на yummyanime.tv — на других сайтах расширение молчит.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="container">
+    <h2>Живое демо</h2>
+    <p class="lead">
+      Это не картинка: страница действительно сходит на сервера каталога и покажет, для какого аниме нашлись озвучки,
+      сколько в каждой серий и какие качества отдаёт плеер. Вставьте ссылку на страницу аниме с yummyanime.tv или просто название.
+    </p>
+    <div class="demo-panel">
+      <form class="demo-form" id="demoForm" autocomplete="off">
+        <input id="demoInput" type="text" value="https://yummyanime.tv/4934-reinkarnacija-bezrabotnogo-istorija-o-prikljuchenijah-v-drugom-mire-3-r2.html" placeholder="Ссылка на аниме с yummyanime.tv или название" aria-label="Ссылка или название аниме">
+        <button class="btn btn-primary" id="demoBtn" type="submit">Проверить</button>
+      </form>
+      <div class="demo-hint">Пример уже вставлен — просто нажмите «Проверить». Ещё можно вставить <code>yummyanime.tv</code> ссылку на любое другое аниме.</div>
+      <div class="demo-hint">Это статичная версия страницы. Демо ходит к API сайта через публичные CORS-прокси, поэтому открывайте страницу по http(s) — с локального веб-сервера (<code>python3 -m http.server</code>) или с любого хостинга, а не двойным кликом по файлу.</div>
+      <div class="status" id="demoStatus"><span class="spinner"></span><span id="demoStatusText"></span></div>
+
+      <div class="result" id="demoResult">
+        <div class="res-top">
+          <img class="poster" id="demoPoster" alt="Постер аниме">
+          <div>
+            <div class="res-title" id="demoTitle"></div>
+            <div class="res-meta" id="demoMeta"></div>
+            <div class="res-desc" id="demoDesc"></div>
+            <div id="demoAltWrap" style="display:none">
+              <div class="subhead" style="margin-top:14px"><h3>Нашли не то?</h3><span class="note">Выберите другой вариант</span></div>
+              <div class="alt" id="demoAlt"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subhead">
+          <h3 id="demoDubsTitle">Озвучки и студии, которые есть на сайте</h3>
+          <span class="note" id="demoDubsNote"></span>
+        </div>
+        <div class="dubs" id="demoDubs"></div>
+
+        <div id="demoQualityWrap" style="display:none">
+          <div class="subhead">
+            <h3>Качество и что получится на выходе</h3>
+            <span class="note">это и предложит расширение при скачивании</span>
+          </div>
+          <div class="quals" id="demoQuals"></div>
+          <div class="estimate" id="demoEstimate"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Установка — 4 шага</h2>
+    <p class="lead">Расширение ставится как распакованное (Chrome Web Store не нужен). Занимает меньше минуты.</p>
+    <div class="install">
+      <div class="i">
+        <span class="n"></span>
+        <div>
+          <p>Скачайте архив <b>Download-anime-videos-v1.0.0.zip</b> и распакуйте его в любую папку.</p>
+          <div class="hint">Внутри — <code>manifest.json</code>, скрипты и папка <code>icons</code>.</div>
+        </div>
+      </div>
+      <div class="i">
+        <span class="n"></span>
+        <div>
+          <p>Откройте в браузере страницу <code>chrome://extensions</code>.</p>
+          <div class="hint">В Edge — <code>edge://extensions</code>, в Opera — <code>opera://extensions</code>.</div>
+        </div>
+      </div>
+      <div class="i">
+        <span class="n"></span>
+        <div>
+          <p>Включите <b>«Режим разработчика»</b> (Developer mode) в правом верхнем углу.</p>
+        </div>
+      </div>
+      <div class="i">
+        <span class="n"></span>
+        <div>
+          <p>Нажмите <b>«Загрузить распакованное расширение»</b> и выберите распакованную папку.</p>
+          <div class="hint">После этого откройте любое аниме на yummyanime.tv — появится кнопка «Скачать сезон».</div>
+        </div>
+      </div>
+    </div>
+    <div class="cta" style="margin-top:22px">
+      <a class="btn btn-primary" href="Download-anime-videos-v1.0.0.zip" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11" /><path d="M7.5 10.5 12 15l4.5-4.5" /><path d="M4.5 19h15" /></svg>
+        Скачать расширение (.zip)
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/pythonistaVP/Download-anime-videos" target="_blank" rel="noopener">Открыть репозиторий на GitHub</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Частые вопросы</h2>
+    <div class="faq">
+      <details class="qa">
+        <summary>Почему расширение работает только на yummyanime.tv?</summary>
+        <p>Так задумано: разрешения выданы строго на один домен, скрипт встраивается только в страницы этого сайта, и никакие другие вкладки расширение не читает. Это и безопаснее, и честнее.</p>
+      </details>
+      <details class="qa">
+        <summary>Можно выбрать только часть серий?</summary>
+        <p>Да. По умолчанию выбран весь сезон, но можно снять галочки, нажать «только вышедшие» или ввести диапазон вручную — например <code>1-6</code> или <code>1,3,5-7</code>.</p>
+      </details>
+      <details class="qa">
+        <summary>Куда сохраняются файлы?</summary>
+        <p>Вы выбираете папку сами (через встроенный диалог выбора каталога). Если папку не выбирать, браузер сохранит файлы в обычные «Загрузки». При сохранении в ZIP серии складываются в подпапку с названием аниме.</p>
+      </details>
+      <details class="qa">
+        <summary>Почему некоторые озвучки помечены как недоступные?</summary>
+        <p>Часть озвучек сайт отдаёт через плеер alloha, у которого нет открытых прямых ссылок на видеофайл. Остальные плееры (Kodik) отдают поток напрямую — с ними расширение и работает. Недоступные озвучки просто помечаются, чтобы вы не ждали зря.</p>
+      </details>
+      <details class="qa">
+        <summary>Это легально?</summary>
+        <p>Расширение не взламывает защиту и не открывает платный контент — оно сохраняет тот же поток, который браузер получает при обычном просмотре. Использовать его стоит только для личного офлайн-просмотра: аниме себе в дорогу. Распространение скачанного — уже на вашей ответственности.</p>
+      </details>
+      <details class="qa">
+        <summary>Что если серия упала с ошибкой?</summary>
+        <p>У каждой серии в менеджере есть кнопка повтора, а расширение само делает несколько попыток с паузой. Уже скачанные серии не перекачиваются, если включён пропуск готового.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <div class="brand">
+          <span class="logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v11" /><path d="M7.5 10.5 12 15l4.5-4.5" /><path d="M4.5 19h15" />
+            </svg>
+          </span>
+          <span class="name">Download anime videos</span>
+          <span class="ver">v1.0.0</span>
+        </div>
+        <div class="foot-note">
+          Расширение для Chromium-браузеров, которое скачивает сезоны аниме с yummyanime.tv в один клик.
+          Создано только для личного офлайн-просмотра.
+        </div>
+      </div>
+      <div class="foot-links">
+        <a href="https://github.com/pythonistaVP/" target="_blank" rel="noopener">Разработчик: @pythonistaVP</a>
+        <a href="https://github.com/pythonistaVP/Download-anime-videos" target="_blank" rel="noopener">github.com/pythonistaVP/Download-anime-videos</a>
+        <a href="Download-anime-videos-v1.0.0.zip" download>Скачать .zip</a>
+      </div>
+    </div>
+    <div class="foot-note">
+      Лицензия MIT. Проект не связан с сайтом yummyanime.tv и его администрацией; все права на аниме принадлежат их правообладателям.
+      Пожалуйста, используйте расширение только для того, чтобы взять любимый сезон с собой в дорогу, а не для распространения.
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+  const PROXIES = [
+    { name: "direct", wrap: (url) => url, timeout: 8000 },
+    { name: "cors.eu.org", wrap: (url) => "https://cors.eu.org/" + url, timeout: 25000 },
+    { name: "allorigins", wrap: (url) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(url), timeout: 25000 },
+    { name: "codetabs", wrap: (url) => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url), timeout: 25000 },
+  ];
+  async function attemptFetch(url, init, timeoutMs) {
+    const controller = new AbortController();
+    const parent = init.signal;
+    if (parent && parent.aborted) throw new DOMException("Операция отменена", "AbortError");
+    const relay = () => controller.abort();
+    if (parent) parent.addEventListener("abort", relay, { once: true });
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, { ...init, signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+      if (parent) parent.removeEventListener("abort", relay);
+    }
+  }
+  async function siteFetch(url, options) {
+    const target = String(url || "");
+    const init = { ...(options || {}), mode: "cors", credentials: "omit", redirect: "follow" };
+    let lastError = null;
+    for (const proxy of PROXIES) {
+      if (init.signal && init.signal.aborted) throw new DOMException("Операция отменена", "AbortError");
+      try {
+        const response = await attemptFetch(proxy.wrap(target), init, proxy.timeout);
+        if (response && response.ok) return response;
+        lastError = new Error("HTTP " + (response ? response.status : "?"));
+      } catch (error) {
+        if (init.signal && init.signal.aborted) throw error;
+        lastError = error;
+      }
+    }
+    throw new Error("нет доступа к сети (CORS-прокси не отвечают): " + String((lastError && lastError.message) || ""));
+  }
+
+  const els = {
+    form: document.querySelector("#demoForm"),
+    input: document.querySelector("#demoInput"),
+    btn: document.querySelector("#demoBtn"),
+    status: document.querySelector("#demoStatus"),
+    statusText: document.querySelector("#demoStatusText"),
+    result: document.querySelector("#demoResult"),
+    poster: document.querySelector("#demoPoster"),
+    title: document.querySelector("#demoTitle"),
+    meta: document.querySelector("#demoMeta"),
+    desc: document.querySelector("#demoDesc"),
+    altWrap: document.querySelector("#demoAltWrap"),
+    alt: document.querySelector("#demoAlt"),
+    dubsTitle: document.querySelector("#demoDubsTitle"),
+    dubsNote: document.querySelector("#demoDubsNote"),
+    dubs: document.querySelector("#demoDubs"),
+    qualWrap: document.querySelector("#demoQualityWrap"),
+    quals: document.querySelector("#demoQuals"),
+    estimate: document.querySelector("#demoEstimate"),
+  };
+
+  const BITRATE = { 240: 34, 360: 52, 480: 74, 720: 112, 1080: 190, 1440: 320, 2160: 400 };
+  const DEFAULT_DURATION = 24;
+
+  let libs = null;
+  let api = null;
+  let state = { anime: null, groups: [], dub: null, qualities: [], quality: null, tv: null };
+
+  function esc(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function absUrl(url) {
+    const text = String(url || "");
+    if (!text) return "";
+    if (text.startsWith("//")) return "https:" + text;
+    return text;
+  }
+  function posterUrl(poster) {
+    if (!poster) return "";
+    if (typeof poster === "string") return absUrl(poster);
+    return absUrl(poster.big || poster.fullsize || poster.huge || poster.medium || poster.small);
+  }
+  function formatBytes(bytes) {
+    if (!bytes) return "0 Б";
+    const units = ["Б", "КБ", "МБ", "ГБ", "ТБ"];
+    let value = bytes;
+    let i = 0;
+    while (value >= 1024 && i < units.length - 1) { value /= 1024; i++; }
+    return (value >= 10 || i === 0 ? Math.round(value) : value.toFixed(1)) + " " + units[i];
+  }
+  function plural(n, one, few, many) {
+    const mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+    return many;
+  }
+  function setStatus(text, isError) {
+    if (!text) { els.status.classList.remove("on"); return; }
+    els.status.classList.add("on");
+    els.status.classList.toggle("err", !!isError);
+    els.status.querySelector(".spinner").style.display = isError ? "none" : "block";
+    els.statusText.textContent = text;
+  }
+  function fail(message) {
+    setStatus("Не получилось: " + message, true);
+  }
+  function normalizeQuery(text) {
+    const raw = String(text || "").trim();
+    if (!raw) return "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    if (/^[\w-]+(\.[\w-]+)+(\.html)?(\/|$)/.test(raw)) return "https://" + raw.replace(/^\/+/, "");
+    return raw;
+  }
+  function sanitizeFilename(text) {
+    return String(text || "").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+  }
+
+  async function loadLibs() {
+    if (libs) return libs;
+    const [yani, kodik] = await Promise.all([
+      import("./lib/yani.js"),
+      import("./lib/kodik.js"),
+    ]);
+    libs = { ...yani, fetchKodikLinks: kodik.fetchKodikLinks, pickQuality: kodik.pickQuality };
+    api = libs.createYaniApi({ fetchImpl: (url, options) => siteFetch(url, options) });
+    return libs;
+  }
+
+  async function resolve(query) {
+    const { fetchYummyTvAnime, pickBestMatch } = await loadLibs();
+    const clean = normalizeQuery(query);
+    setStatus("Смотрю страницу аниме и ищу его в каталоге сайта…");
+    let wantedTitle = clean;
+    let wantedYear = 0;
+    let tv = null;
+    if (/^https?:\/\//i.test(clean) && /yummyanime|yummyani/i.test(clean)) {
+      tv = await fetchYummyTvAnime(clean, { fetchImpl: (url, options) => siteFetch(url, options) });
+      wantedTitle = tv.title || clean;
+      wantedYear = Number(tv.year) || 0;
+    }
+    setStatus("Каталог отвечает, подбираю лучшее совпадение…");
+    const results = await api.search(wantedTitle);
+    if (!results || !results.length) throw new Error("ничего не нашлось по запросу «" + wantedTitle + "»");
+    const ranked = pickBestMatch(results, wantedTitle, wantedYear);
+    state.tv = tv;
+    return ranked;
+  }
+
+  async function openAnime(rankedEntry, alternatives) {
+    const { groupVideos } = await loadLibs();
+    const item = rankedEntry.item;
+    setStatus("Загружаю озвучки и серии…");
+    const [anime, videos] = await Promise.all([api.anime(item.anime_id), api.videos(item.anime_id)]);
+    const groups = groupVideos(videos);
+    state.anime = anime;
+    state.groups = groups;
+    state.dub = null;
+    state.quality = null;
+    state.qualities = [];
+    renderAnime(item, alternatives);
+  }
+
+  function renderAnime(item, alternatives) {
+    const anime = state.anime || {};
+    const poster = posterUrl(anime.poster) || (state.tv && state.tv.poster) || "";
+    els.poster.src = poster;
+    els.poster.alt = "Постер: " + (anime.title || item.title || "");
+    els.poster.onerror = () => { els.poster.removeAttribute("src"); };
+
+    els.title.textContent = anime.title || item.title || "";
+
+    const episodes = anime.episodes || {};
+    const supported = state.groups.filter((g) => g.supported).length;
+    const meta = [];
+    if (anime.year) meta.push(String(anime.year));
+    const typeName = anime.type && (anime.type.name || anime.type.shortname || anime.type.title);
+    if (typeName) meta.push(String(typeName));
+    const rating = anime.rating && (anime.rating.average || anime.rating.kp_rating);
+    if (rating) meta.push("★ " + Number(rating).toFixed(2));
+    if (episodes.count) meta.push(episodes.count + " " + plural(episodes.count, "серия", "серии", "серий") + (episodes.aired && episodes.aired < episodes.count ? " (вышло " + episodes.aired + ")" : ""));
+    if (anime.season) meta.push("сезон " + anime.season);
+    if (state.groups.length) meta.push(supported + " " + plural(supported, "озвучка", "озвучки", "озвучек") + " доступно");
+    els.meta.innerHTML = meta.map((m) => '<span class="chip">' + esc(m) + "</span>").join("");
+
+    els.desc.textContent = String(anime.description || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
+    const list = alternatives || [];
+    const others = list.filter((entry) => !state.anime || entry.item.anime_id !== (state.anime.anime_id || entry.item.anime_id));
+    els.altWrap.style.display = others.length ? "block" : "none";
+    els.alt.innerHTML = others.slice(0, 5).map((entry) =>
+      '<button class="qual" type="button" data-alt="' + esc(entry.item.anime_id) + '">' + esc(entry.item.title) + (entry.item.year ? " · " + esc(entry.item.year) : "") + "</button>"
+    ).join("");
+    els.alt.querySelectorAll("button").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const target = list.find((entry) => String(entry.item.anime_id) === button.dataset.alt);
+        if (target) { setStatus("Переключаюсь на другое совпадение…"); await openAnime(target, list); setStatus(""); }
+      });
+    });
+
+    els.result.classList.add("on");
+    els.qualWrap.style.display = "none";
+    renderDubs();
+    setStatus("");
+  }
+
+  function renderDubs() {
+    const groups = state.groups;
+    els.dubsTitle.textContent = "Озвучки и студии, которые есть на сайте";
+    els.dubsNote.textContent = groups.length ? groups.length + " " + plural(groups.length, "вариант", "варианта", "вариантов") + " · пунктиром — недоступны для скачивания" : "";
+    els.dubs.innerHTML = "";
+    groups.forEach((group, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "dub" + (group.supported ? "" : " off") + (state.dub === group ? " on" : "");
+      button.dataset.i = String(index);
+      button.title = group.supported ? "Нажмите, чтобы посмотреть доступные качества" : "Эта озвучка отдаётся через плеер alloha — прямых ссылок нет";
+      button.innerHTML = esc(group.dubbing) + '<span class="n">' + group.episodeCount + " " + plural(group.episodeCount, "серия", "серии", "серий") + (group.supported ? "" : " · нет") + "</span>";
+      if (group.supported) {
+        button.addEventListener("click", () => selectDub(group, button));
+      }
+      els.dubs.appendChild(button);
+    });
+    if (!groups.length) {
+      els.dubs.innerHTML = '<span class="note">Не нашлось ни одной озвучки с прямыми ссылками.</span>';
+    }
+  }
+
+  async function selectDub(group, button) {
+    const { fetchKodikLinks, pickQuality } = await loadLibs();
+    state.dub = group;
+    els.dubs.querySelectorAll(".dub").forEach((node) => node.classList.toggle("on", node === button));
+    setStatus("Спрашиваю у плеера прямые ссылки на видео (" + group.episodes.length + " " + plural(group.episodes.length, "серия", "серии", "серий") + ")…");
+    try {
+      const info = await fetchKodikLinks(group.episodes[0].url, { fetchImpl: (url, options) => siteFetch(url, options) });
+      state.qualities = info.available.slice().sort((a, b) => a - b);
+      state.quality = pickQuality(info.qualities, state.qualities[state.qualities.length - 1]);
+      renderQualities();
+      setStatus("");
+    } catch (error) {
+      fail(error.message);
+      els.qualWrap.style.display = "none";
+    }
+  }
+
+  function renderQualities() {
+    const anime = state.anime || {};
+    const episodes = state.dub ? state.dub.episodes.length : 0;
+    const aired = Number((anime.episodes && (anime.episodes.aired || anime.episodes.count)) || 0) || 1;
+    const totalSeconds = Number(anime.duration) || 0;
+    const firstEpisode = state.dub && state.dub.episodes[0];
+    const measuredSeconds = Number(firstEpisode && firstEpisode.duration);
+    const episodeSeconds = measuredSeconds > 30
+      ? measuredSeconds
+      : (totalSeconds > 0 ? Math.round(totalSeconds / aired) : DEFAULT_DURATION * 60);
+    els.qualWrap.style.display = "block";
+    els.quals.innerHTML = state.qualities.map((q) =>
+      '<button class="qual' + (q === state.quality ? " on" : "") + '" type="button" data-q="' + q + '">' + q + 'p</button>'
+    ).join("");
+    els.quals.querySelectorAll("button").forEach((button) => {
+      button.addEventListener("click", () => { state.quality = Number(button.dataset.q); renderQualities(); });
+    });
+
+    const rate = (BITRATE[state.quality] || BITRATE[720]) * 1024;
+    const perEpisode = rate * episodeSeconds;
+    const total = perEpisode * Math.max(1, episodes);
+    const best = state.qualities[state.qualities.length - 1];
+    const animeTitle = sanitizeFilename(anime.title || "");
+    const season = Number(anime.season) || 1;
+    const fileName = animeTitle + " - S" + String(season).padStart(2, "0") + "E01 - " + sanitizeFilename(state.dub ? state.dub.dubbing : "") + " - " + state.quality + "p.mp4";
+    const minutes = Math.round(episodeSeconds / 60);
+
+    els.estimate.innerHTML =
+      "<div>Плеер отдаёт качества: <b>" + state.qualities.map((q) => q + "p").join(", ") + "</b>" + (best === state.quality ? " — выбрано максимальное" : "") + "</div>" +
+      "<div>Одна серия (" + minutes + " мин, " + state.quality + "p): <b>≈ " + formatBytes(perEpisode) + "</b></div>" +
+      "<div>Вся озвучка — " + episodes + " " + plural(episodes, "серия", "серии", "серий") + ": <b>≈ " + formatBytes(total) + "</b></div>" +
+      "<div>Имя файла будет таким:<br><span class=\"fname\">" + esc(fileName) + "</span></div>";
+  }
+
+  els.form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const query = els.input.value.trim();
+    if (!query) return;
+    els.btn.disabled = true;
+    els.result.classList.remove("on");
+    try {
+      await loadLibs();
+      const ranked = await resolve(query);
+      setStatus("Нашёл: " + (ranked[0].item.title || "") + " — открываю…");
+      await openAnime(ranked[0], ranked.slice(0, 5));
+    } catch (error) {
+      fail(String((error && error.message) || error));
+    } finally {
+      els.btn.disabled = false;
+    }
+  });
+
+  (async () => {
+    try {
+      await loadLibs();
+    } catch (error) {
+      els.form.querySelector("input").value = "";
+      setStatus("Демо недоступно: не загрузились ES-модули из папки lib. Если страница открыта прямо с диска (file://), браузер блокирует импорт модулей — запустите локальный сервер (python3 -m http.server 8080) или загрузите папку на статичный хостинг.", true);
+    }
+  })();
+</script>
+</body>
+</html>

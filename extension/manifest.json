@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Download anime videos",
+  "version": "1.0.0",
+  "version_name": "1.0.0",
+  "description": "Скачивает серии и целые сезоны аниме с yummyanime.tv: выбор озвучки, качества, отдельными файлами или одним ZIP. Только для личного офлайн-просмотра в дорогу.",
+  "homepage_url": "https://github.com/pythonistaVP/Download-anime-videos",
+  "author": "pythonistaVP",
+  "minimum_chrome_version": "116",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Download anime videos",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://yummyanime.tv/*", "*://*.yummyanime.tv/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "tabs",
+    "downloads",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "*://yummyanime.tv/*",
+    "*://*.yummyanime.tv/*",
+    "*://yummyani.me/*",
+    "*://*.yummyani.me/*",
+    "*://kodikplayer.com/*",
+    "*://*.kodikplayer.com/*",
+    "*://*.kodik.info/*",
+    "*://*.kodik.biz/*",
+    "*://*.kodik.cc/*",
+    "*://*.kodik-storage.com/*",
+    "*://*.solodcdn.com/*",
+    "*://*.cloud.solodcdn.com/*"
+  ],
+  "optional_host_permissions": ["*://*/*"]
+}

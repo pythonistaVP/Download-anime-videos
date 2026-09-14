@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Download anime videos — менеджер загрузок</title>
+  <link rel="icon" href="icons/icon48.png" />
+  <link rel="stylesheet" href="manager.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="logo">DAV</div>
+      <div>
+        <h1>Download anime videos</h1>
+        <div class="sub">менеджер загрузок · только для yummyanime.tv · <span id="versionEl"></span></div>
+      </div>
+    </div>
+    <nav class="topnav">
+      <a href="https://github.com/pythonistaVP/" target="_blank" rel="noreferrer">Разработчик: pythonistaVP</a>
+      <a href="https://github.com/pythonistaVP/Download-anime-videos" target="_blank" rel="noreferrer">GitHub репозиторий</a>
+    </nav>
+  </header>
+
+  <div class="warn">
+    <b>Внимание.</b> Расширение создано только для скачивания аниме себе в дорогу — для личного офлайн-просмотра.
+    Пожалуйста, не выкладывайте скачанные файлы в открытый доступ и не используйте их в коммерческих целях.
+    Скачивание работает только со страниц сайта <b>yummyanime.tv</b>.
+  </div>
+
+  <div class="permBar" id="permBar" hidden>
+    <span id="permText"></span>
+    <button class="btn ghost small" id="permBtn">Разрешить доступ</button>
+  </div>
+
+  <main class="layout">
+    <section class="col">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>1 · Аниме</h2>
+          <span class="hint" id="sourceHint"></span>
+        </div>
+        <div class="anime-card">
+          <img id="posterImg" alt="" hidden />
+          <div class="anime-meta">
+            <div class="anime-title" id="animeTitle">Определяем тайтл…</div>
+            <div class="anime-sub" id="animeSub"></div>
+            <div class="anime-sub" id="animeLinkRow"></div>
+          </div>
+        </div>
+        <details class="search-box" id="searchBox">
+          <summary>Не тот тайтл? Найти вручную</summary>
+          <div class="inline">
+            <input type="text" id="searchInput" placeholder="Название, например: Реинкарнация безработного" spellcheck="false" />
+            <button class="btn ghost" id="searchBtn">Найти</button>
+          </div>
+          <div class="candidates" id="candidateList"></div>
+        </details>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>2 · Студия и озвучка</h2>
+          <span class="hint" id="dubHint"></span>
+        </div>
+        <div class="dub-list" id="dubList"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>3 · Качество</h2>
+          <span class="hint" id="qualityHint"></span>
+        </div>
+        <div class="chips" id="qualityChips"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>4 · Серии</h2>
+          <span class="hint" id="episodeHint"></span>
+        </div>
+        <div class="chips" id="epChips">
+          <span class="chip" data-range="all">все серии</span>
+          <span class="chip" data-range="first6">первые 6</span>
+          <span class="chip" data-range="last6">последние 6</span>
+          <span class="chip" data-range="invert">инвертировать</span>
+          <span class="chip" data-range="none">снять всё</span>
+        </div>
+        <div class="ep-grid" id="epGrid"></div>
+        <div class="inline ep-manual">
+          <input type="text" id="epInput" placeholder="например: 1-12,15" spellcheck="false" />
+          <button class="btn ghost" id="epApplyBtn">Применить</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>5 · Как сохранить</h2>
+          <span class="hint" id="outputHint"></span>
+        </div>
+        <div class="chips" id="modeChips">
+          <span class="chip active" data-mode="files">отдельными файлами</span>
+          <span class="chip" data-mode="zip">одним ZIP-архивом</span>
+        </div>
+        <div class="folder-row">
+          <button class="btn ghost" id="folderBtn">Выбрать папку</button>
+          <button class="btn ghost small" id="folderPermBtn" hidden>Разрешить доступ к папке</button>
+          <span class="folder-name" id="folderName">папка не выбрана</span>
+        </div>
+        <label class="check"><input type="checkbox" id="skipExisting" /> пропускать уже скачанные серии</label>
+        <div class="summary" id="summary"></div>
+        <div class="actions">
+          <button class="btn primary" id="startBtn">Скачать</button>
+          <button class="btn ghost" id="pauseBtn" hidden>Пауза</button>
+          <button class="btn ghost" id="cancelBtn" hidden>Отменить</button>
+          <button class="btn ghost" id="clearBtn" hidden>Очистить список</button>
+        </div>
+        <div class="err" id="setupError"></div>
+      </section>
+    </section>
+
+    <section class="col">
+      <section class="panel queue-panel">
+        <div class="panel-head">
+          <h2>Очередь загрузок</h2>
+          <span class="hint" id="queueHint">—</span>
+        </div>
+        <div class="overall">
+          <div class="bar"><div class="bar-fill" id="overallFill"></div></div>
+          <div class="stats" id="overallStats">Ожидание</div>
+        </div>
+        <div class="job-list" id="jobList"><div class="empty">Пока ничего не скачивается</div></div>
+        <div class="note">Не закрывайте эту вкладку до конца загрузки — браузер остановит скачивание, если вкладка будет закрыта.</div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Журнал</h2>
+          <button class="btn ghost small" id="copyLogBtn">Копировать</button>
+        </div>
+        <pre class="log" id="logEl"></pre>
+      </section>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Download anime videos · для личного офлайн-просмотра · yummyanime.tv</span>
+    <span>
+      <a href="https://github.com/pythonistaVP/" target="_blank" rel="noreferrer">pythonistaVP</a>
+      ·
+      <a href="https://github.com/pythonistaVP/Download-anime-videos" target="_blank" rel="noreferrer">GitHub</a>
+    </span>
+  </footer>
+
+  <script src="vendor/mux.min.js"></script>
+  <script type="module" src="manager.js"></script>
+</body>
+</html>

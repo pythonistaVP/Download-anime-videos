@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Download anime videos</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="head">
+    <div class="logo">DAV</div>
+    <div class="titles">
+      <b>Download anime videos</b>
+      <span>скачивание сезонов с yummyanime.tv</span>
+    </div>
+  </header>
+
+  <main class="body">
+    <section class="card" id="siteCard">
+      <div class="card-label">Текущая вкладка</div>
+      <div class="card-title" id="siteTitle">Проверяем…</div>
+      <div class="card-sub" id="siteSub"></div>
+    </section>
+
+    <button class="btn primary" id="openBtn">Открыть менеджер загрузок</button>
+
+    <div class="row">
+      <label for="urlInput">Или вставьте ссылку на аниме</label>
+      <div class="inline">
+        <input type="text" id="urlInput" placeholder="https://yummyanime.tv/1234-..." spellcheck="false" />
+        <button class="btn ghost" id="parseBtn">Найти</button>
+      </div>
+    </div>
+
+    <p class="notice" id="notice">
+      Расширение создано только для скачивания аниме себе в дорогу — для личного офлайн-просмотра.
+      Пожалуйста, не выкладывайте скачанные файлы в открытый доступ и не используйте их в коммерческих целях.
+    </p>
+
+    <p class="err" id="error" hidden></p>
+
+    <div class="chips">
+      <span class="chip">Chrome / Edge / Opera</span>
+      <span class="chip">только yummyanime.tv</span>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <a href="https://github.com/pythonistaVP/" target="_blank" rel="noreferrer">Разработчик</a>
+    <a href="https://github.com/pythonistaVP/Download-anime-videos" target="_blank" rel="noreferrer">GitHub репозиторий</a>
+    <span id="version">v1.0.0</span>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
