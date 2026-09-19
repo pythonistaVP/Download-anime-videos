@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Download anime videos — расширение для скачивания аниме с yummyanime.tv</title>
-<meta name="description" content="Расширение для Chrome (Manifest V3): скачивайте целый сезон аниме с yummyanime.tv в один клик — любая студия и озвучка, которая есть на сайте, выбор качества, отдельные файлы или один ZIP-архив. Работает только на yummyanime.tv. Создано только для личного офлайн-просмотра — аниме себе в дорогу.">
+<title>Download anime videos — расширение для скачивания аниме и видеопотоков</title>
+<meta name="description" content="Расширение для Chrome (Manifest V3): скачивайте целый сезон аниме в один клик — yummyanime.tv, yummyani.me, old.yummyani.me, yani.tv, а на любом другом сайте поток найдёт кнопка «Найти видео на этой странице». Любая студия и озвучка, выбор качества, отдельные файлы или один ZIP-архив, докачка и параллельные серии, субтитры и NFO. Создано только для личного офлайн-просмотра — аниме себе в дорогу.">
 <meta name="theme-color" content="#0e0f14">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Download anime videos — скачивание аниме с yummyanime.tv в один клик">
-<meta property="og:description" content="Выбираете озвучку, качество и серии — получаете отдельные файлы или один ZIP. Расширение для Chromium, Manifest V3, MIT.">
+<meta property="og:title" content="Download anime videos — скачивание аниме и видеопотоков в один клик">
+<meta property="og:description" content="yummyanime.tv, yummyani.me, old.yummyani.me, yani.tv и любые другие сайты: выбираете озвучку, качество и серии — получаете отдельные файлы или один ZIP. Расширение для Chromium, Manifest V3, MIT.">
 <meta property="og:image" content="https://user.uploads.dev/file/15d0e96d36864d6ace1556b6a635e7e7.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="assets/icons/icon128.png">
@@ -271,6 +271,25 @@
     .brand .name { font-size: 14.5px; }
     .cta .btn { width: 100%; justify-content: center; }
   }
+  /* ---------- вкладки и разделы ---------- */
+  .tabs { display: inline-flex; align-items: center; gap: 4px; padding: 4px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 999px; }
+  .tab { position: relative; appearance: none; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13.5px; font-weight: 600; padding: 7px 15px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; transition: background 0.18s ease, color 0.18s ease, box-shadow 0.2s ease; }
+  .tab:hover { color: var(--text); }
+  .tab.on { background: var(--grad); color: #fff; box-shadow: 0 10px 26px rgba(224, 69, 123, 0.32); }
+  .tab-badge { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: var(--grad); color: #fff; }
+  .tab.on .tab-badge { background: rgba(255, 255, 255, 0.28); }
+  .tab-badge[hidden] { display: none; }
+  .view[hidden] { display: none !important; }
+  .changelog { display: grid; gap: 14px; }
+  .chg { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; }
+  .chg.current { border-color: rgba(224, 69, 123, 0.45); box-shadow: 0 20px 55px rgba(224, 69, 123, 0.14); }
+  .chg-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chg-head h3 { font-size: 21px; margin: 0; letter-spacing: -0.01em; }
+  .chg-tag { font-size: 11.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 11px; border-radius: 999px; background: var(--grad); color: #fff; }
+  .chg ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+  .chg li { color: var(--muted); font-size: 14.5px; }
+  .chg li b { color: var(--text); font-weight: 600; }
+  @media (max-width: 760px) { .tabs { order: 3; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; } .tab { padding: 7px 10px; font-size: 13px; } }
 </style>
 </head>
 <body>
@@ -283,12 +302,16 @@
         </svg>
       </span>
       <span class="name">Download anime videos</span>
-      <span class="ver">v1.0.0</span>
+      <span class="ver">v1.3.0</span>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Разделы страницы">
+      <button class="tab on" type="button" role="tab" data-view="viewMain" aria-selected="true">Расширение</button>
+      <button class="tab" type="button" role="tab" data-view="viewNews" aria-selected="false">Что добавлено<span class="tab-badge" id="newsBadge">new</span></button>
     </div>
     <nav class="top-links">
       <a class="btn btn-ghost btn-sm" href="#demo">Живое демо</a>
       <a class="btn btn-ghost btn-sm" href="https://github.com/pythonistaVP/Download-anime-videos" target="_blank" rel="noopener">GitHub</a>
-      <a class="btn btn-primary btn-sm" href="Download-anime-videos-v1.0.0.zip" download>
+      <a class="btn btn-primary btn-sm" href="Download-anime-videos-v1.3.0.zip" download>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 3v11" /><path d="M7.5 10.5 12 15l4.5-4.5" /><path d="M4.5 19h15" />
         </svg>
@@ -298,17 +321,19 @@
   </div>
 </header>
 
+<div class="view" id="viewMain">
 <section class="hero">
   <div class="container hero-grid">
     <div>
       <span class="badge"><span class="dot-live"></span> Расширение для Chrome · Manifest V3</span>
       <h1>Download <span class="grad-text">anime</span> videos</h1>
       <p class="sub">
-        Скачивайте <b>целый сезон аниме с yummyanime.tv в один клик</b>: выберите студию и озвучку, которая есть на сайте,
-        нужные серии, качество — и получите <b>отдельные файлы или один ZIP-архив</b>.
+        Скачивайте <b>целый сезон аниме в один клик</b> — с <b>yummyanime.tv</b>, <b>yummyani.me</b> и старого зеркала <b>old.yummyani.me</b>,
+        с <b>yani.tv</b>, а на любом другом сайте поток найдёт кнопка <b>«Найти видео на этой странице»</b>. Выбираете серии и качество —
+        и получаете <b>отдельные файлы или один ZIP-архив</b>.
       </p>
       <div class="cta">
-        <a class="btn btn-primary" href="Download-anime-videos-v1.0.0.zip" download>
+        <a class="btn btn-primary" href="Download-anime-videos-v1.3.0.zip" download>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 3v11" /><path d="M7.5 10.5 12 15l4.5-4.5" /><path d="M4.5 19h15" />
           </svg>
@@ -322,7 +347,7 @@
       <div class="chips">
         <span class="chip">
           <svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-          Работает только на yummyanime.tv
+          yummyanime.tv · yummyani.me · old.yummyani.me · yani.tv · любые сайты
         </span>
         <span class="chip">
           <svg viewBox="0 0 24 24" fill="none" stroke="#a98bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h10" /></svg>
@@ -331,6 +356,10 @@
         <span class="chip">
           <svg viewBox="0 0 24 24" fill="none" stroke="#ff9dbf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="M7 10l5 5 5-5" /><path d="M4 20h16" /></svg>
           Качество до 1080p
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#8ab4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16" /><path d="M8 8l-4 4 4 4" /><path d="M16 8l4 4-4 4" /></svg>
+          Перехват потоков вместе с заголовками
         </span>
         <span class="chip">MIT · без рекламы и слежки</span>
       </div>
@@ -396,7 +425,7 @@
 <section>
   <div class="container">
     <h2>Что умеет</h2>
-    <p class="lead">Расширение не «качает видео со страницы», а честно повторяет то, что делает плеер: достаёт прямые ссылки у Kodik, тянет HLS-поток по сегментам и собирает из них обычный MP4.</p>
+    <p class="lead">Расширение не «качает видео со страницы», а честно повторяет то, что делает плеер: достаёт прямые ссылки у Kodik, тянет HLS-поток по сегментам и собирает из них обычный MP4. А если плеер закрытый — перехватывает поток вместе с нужными заголовками.</p>
     <div class="cards">
       <div class="card">
         <div class="ico">
@@ -438,7 +467,42 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="#a98bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="M7 10l5 5 5-5" /><path d="M4 20h16" /></svg>
         </div>
         <h3>Настоящий менеджер</h3>
-        <p>Очередь, прогресс, скорость, ETA, пауза/продолжить, отмена, повтор упавших серий и живой лог — всё в отдельной вкладке.</p>
+        <p>Очередь, прогресс, скорость, ETA, пауза/продолжить, отмена и живой лог. Несколько серий качаются параллельно, сегменты кэшируются — можно продолжить с места обрыва.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16" /><path d="M4 12h10" /><path d="M4 18h13" /></svg>
+        </div>
+        <h3>Старые зеркала и yani.tv</h3>
+        <p>yummyani.me, old.yummyani.me и короткие ссылки yani.tv/a… — у этих страниц есть id тайтла, поэтому расширение определяет аниме <b>точно</b>, без угадывания по названию.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a98bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z" /><path d="M10 9h6" /><path d="M10 13h6" /><path d="M7 9v4" /></svg>
+        </div>
+        <h3>Любые другие сайты</h3>
+        <p>Кнопка «Найти видео на этой странице»: расширение разбирает разметку страницы, находит плееры и потоки и предлагает только то, что реально можно скачать.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#8ab4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6" /><path d="M6 9h12v11H6z" /><path d="M9 14h6" /></svg>
+        </div>
+        <h3>Перехват потоков с заголовками</h3>
+        <p>Слежение (по клику и только для текущего сайта) запоминает не только ссылку на поток, но и Referer, Origin и нестандартные заголовки — и подставляет их при скачивании. Без этого многие CDN отвечают 403.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffcd7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="M7 10l5 5 5-5" /><path d="M4 20h16" /></svg>
+        </div>
+        <h3>Прямые ссылки и .mp4</h3>
+        <p>Ссылку на <code>.m3u8</code> или <code>.mp4</code> можно вставить в менеджер вручную, а для прямых файлов работает докачка и прогресс.</p>
+      </div>
+      <div class="card">
+        <div class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ff9dbf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z" /><path d="M8 11h7" /><path d="M8 15h5" /></svg>
+        </div>
+        <h3>Субтитры, плейлист и NFO</h3>
+        <p>Рядом с сезоном можно сохранить субтитры <code>.vtt</code>, плейлист <code>.m3u</code>, <code>tvshow.nfo</code> для Jellyfin/Plex/Kodi и постер.</p>
       </div>
     </div>
   </div>
@@ -453,8 +517,8 @@
         <div class="steps">
           <div class="step">
             <div class="num">1</div>
-            <h3>Открываете аниме на yummyanime.tv</h3>
-            <p>Расширение читает страницу, находит название и по нему определяет аниме в каталоге сайта.</p>
+            <h3>Открываете аниме на поддерживаемом сайте</h3>
+            <p>yummyanime.tv, yummyani.me, old.yummyani.me, yani.tv: расширение читает страницу и определяет тайтл — на старом дизайне точно по id страницы, на новом по названию. На незнакомом сайте вы сами нажимаете «Найти видео на этой странице» в попапе.</p>
           </div>
           <div class="step">
             <div class="num">2</div>
@@ -464,7 +528,7 @@
           <div class="step">
             <div class="num">3</div>
             <h3>Расширение достаёт поток</h3>
-            <p>У плеера Kodik запрашиваются прямые ссылки, затем HLS-манифест разбивается на сегменты и они тянутся параллельно.</p>
+            <p>У плеера Kodik запрашиваются прямые ссылки, HLS-манифест разбивается на сегменты и они тянутся параллельно. Если плеер закрытый (Alloha и подобные) — поток подхватывает перехватчик вместе с нужными заголовками.</p>
           </div>
           <div class="step">
             <div class="num">4</div>
@@ -481,12 +545,13 @@
           <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span> Скачивание может идти в фоне — можно закрыть вкладку с аниме, менеджер продолжит.</li>
           <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span> Куда сохранять — выбираете вы (папка через File System Access API или загрузки браузера).</li>
           <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span> Настройки хранятся локально в вашем браузере. Никаких аккаунтов и отправки данных на сторонние сервера.</li>
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#6ee7a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></span> Слежение за потоком — опциональное разрешение: включается только по вашему клику и только для текущего сайта.</li>
         </ul>
         <ul class="checks cross" style="margin-top:14px">
-          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> Озвучки, которые сайт отдаёт через плеер alloha, недоступны — расширение помечает их как неподдерживаемые.</li>
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> Закрытые плееры (Alloha): одним кликом не качаются — нужен перехватчик: включить слежение, запустить серию и забрать поток из попапа.</li>
           <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> Качество — ровно то, что отдаёт плеер. Апскейла и перекодирования нет.</li>
           <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> DRM-защищённые источники не поддерживаются.</li>
-          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> Работает только на yummyanime.tv — на других сайтах расширение молчит.</li>
+          <li><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9d9d" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12" /><path d="M18 6 6 18" /></svg></span> На незнакомых сайтах расширение не показывает кнопку на самой странице — там работа идёт через попап: «Найти видео на этой странице».</li>
         </ul>
       </div>
     </div>
@@ -498,14 +563,15 @@
     <h2>Живое демо</h2>
     <p class="lead">
       Это не картинка: страница действительно сходит на сервера каталога и покажет, для какого аниме нашлись озвучки,
-      сколько в каждой серий и какие качества отдаёт плеер. Вставьте ссылку на страницу аниме с yummyanime.tv или просто название.
+      сколько в каждой серий и какие качества отдаёт плеер. Вставьте ссылку на страницу аниме (yummyanime.tv, yummyani.me,
+      old.yummyani.me, yani.tv) или просто название. Ссылки старого дизайна расширение узнаёт по id страницы.
     </p>
     <div class="demo-panel">
       <form class="demo-form" id="demoForm" autocomplete="off">
-        <input id="demoInput" type="text" value="https://yummyanime.tv/4934-reinkarnacija-bezrabotnogo-istorija-o-prikljuchenijah-v-drugom-mire-3-r2.html" placeholder="Ссылка на аниме с yummyanime.tv или название" aria-label="Ссылка или название аниме">
+        <input id="demoInput" type="text" value="https://yummyanime.tv/4934-reinkarnacija-bezrabotnogo-istorija-o-prikljuchenijah-v-drugom-mire-3-r2.html" placeholder="Ссылка на аниме или название" aria-label="Ссылка или название аниме">
         <button class="btn btn-primary" id="demoBtn" type="submit">Проверить</button>
       </form>
-      <div class="demo-hint">Пример уже вставлен — просто нажмите «Проверить». Ещё можно вставить <code>yummyanime.tv</code> ссылку на любое другое аниме.</div>
+      <div class="demo-hint">Пример уже вставлен — просто нажмите «Проверить». Можно вставить ссылку с любого поддерживаемого сайта: <code>yummyanime.tv</code>, <code>yummyani.me</code>, <code>old.yummyani.me</code> или <code>yani.tv</code>.</div>
       <div class="demo-hint">Это статичная версия страницы. Демо ходит к API сайта через публичные CORS-прокси, поэтому открывайте страницу по http(s) — с локального веб-сервера (<code>python3 -m http.server</code>) или с любого хостинга, а не двойным кликом по файлу.</div>
       <div class="status" id="demoStatus"><span class="spinner"></span><span id="demoStatusText"></span></div>
 
@@ -550,7 +616,7 @@
       <div class="i">
         <span class="n"></span>
         <div>
-          <p>Скачайте архив <b>Download-anime-videos-v1.0.0.zip</b> и распакуйте его в любую папку.</p>
+          <p>Скачайте архив <b>Download-anime-videos-v1.3.0.zip</b> и распакуйте его в любую папку.</p>
           <div class="hint">Внутри — <code>manifest.json</code>, скрипты и папка <code>icons</code>.</div>
         </div>
       </div>
@@ -571,12 +637,12 @@
         <span class="n"></span>
         <div>
           <p>Нажмите <b>«Загрузить распакованное расширение»</b> и выберите распакованную папку.</p>
-          <div class="hint">После этого откройте любое аниме на yummyanime.tv — появится кнопка «Скачать сезон».</div>
+          <div class="hint">Откройте аниме на yummyanime.tv, yummyani.me, old.yummyani.me или yani.tv — появится кнопка «Скачать сезон». На других сайтах нажмите иконку расширения и «Найти видео на этой странице».</div>
         </div>
       </div>
     </div>
     <div class="cta" style="margin-top:22px">
-      <a class="btn btn-primary" href="Download-anime-videos-v1.0.0.zip" download>
+      <a class="btn btn-primary" href="Download-anime-videos-v1.3.0.zip" download>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11" /><path d="M7.5 10.5 12 15l4.5-4.5" /><path d="M4.5 19h15" /></svg>
         Скачать расширение (.zip)
       </a>
@@ -590,8 +656,8 @@
     <h2>Частые вопросы</h2>
     <div class="faq">
       <details class="qa">
-        <summary>Почему расширение работает только на yummyanime.tv?</summary>
-        <p>Так задумано: разрешения выданы строго на один домен, скрипт встраивается только в страницы этого сайта, и никакие другие вкладки расширение не читает. Это и безопаснее, и честнее.</p>
+        <summary>На каких сайтах работает расширение?</summary>
+        <p>На yummyanime.tv, yummyani.me и его старом зеркале old.yummyani.me, а также на yani.tv оно работает сразу: на странице аниме появляется кнопка «Скачать сезон». На любом другом сайте страница сама не читается — но если вы нажмёте «Найти видео на этой странице» в попапе, расширение попросит доступ к текущему сайту и поищет плеер с потоком. Разрешение выдаётся по клику и только для того сайта, где вы его дали.</p>
       </details>
       <details class="qa">
         <summary>Можно выбрать только часть серий?</summary>
@@ -602,8 +668,8 @@
         <p>Вы выбираете папку сами (через встроенный диалог выбора каталога). Если папку не выбирать, браузер сохранит файлы в обычные «Загрузки». При сохранении в ZIP серии складываются в подпапку с названием аниме.</p>
       </details>
       <details class="qa">
-        <summary>Почему некоторые озвучки помечены как недоступные?</summary>
-        <p>Часть озвучек сайт отдаёт через плеер alloha, у которого нет открытых прямых ссылок на видеофайл. Остальные плееры (Kodik) отдают поток напрямую — с ними расширение и работает. Недоступные озвучки просто помечаются, чтобы вы не ждали зря.</p>
+        <summary>Все озвучки можно скачать?</summary>
+        <p>Почти все. Озвучки, которые сайт отдаёт через плеер Kodik, качаются сразу — расширение запрашивает у плеера прямые ссылки. Закрытые плееры вроде alloha отдают ссылку только после выполнения своего скрипта, поэтому такие озвучки помечены как «через перехватчик»: нажмите «Открыть плеер в новой вкладке», запустите серию с включённым слежением — поток появится в попапе вместе с нужными заголовками, и его можно скачать.</p>
       </details>
       <details class="qa">
         <summary>Это легально?</summary>
@@ -613,9 +679,73 @@
         <summary>Что если серия упала с ошибкой?</summary>
         <p>У каждой серии в менеджере есть кнопка повтора, а расширение само делает несколько попыток с паузой. Уже скачанные серии не перекачиваются, если включён пропуск готового.</p>
       </details>
+      <details class="qa">
+        <summary>Что нового в версии 1.3.0?</summary>
+        <p>Поддержка old.yummyani.me и yani.tv с определением тайтла по id страницы, кнопка «Найти видео на этой странице» для любых сайтов, перехватчик потоков вместе с заголовками, прямые MP4, точное распознавание страниц тайтлов и вкладка «Что добавлено». Полный список — на вкладке <a href="#whats-new">«Что добавлено»</a>.</p>
+      </details>
+      <details class="qa">
+        <summary>Нужно ли давать расширению доступ ко всем сайтам?</summary>
+        <p>Нет. Основные разрешения выданы только на аниме-сайты. Доступ к другим сайтам (и слежение за потоком) запрашивается в момент, когда вы сами нажимаете «Найти видео на этой странице» или «Включить слежение» — и только для той вкладки, где вы это сделали.</p>
+      </details>
+      <details class="qa">
+        <summary>Закрою вкладку менеджера — загрузка потеряется?</summary>
+        <p>Нет. Прогресс сегментов сохраняется на диск, поэтому после повторного запуска загрузка продолжится с места обрыва. Но пока вкладка менеджера открыта, качать быстрее и надёжнее.</p>
+      </details>
+      </details>
     </div>
   </div>
 </section>
+</div>
+
+<div class="view" id="viewNews" hidden>
+  <section id="whats-new">
+    <div class="container">
+      <h2>Что добавлено</h2>
+      <p class="lead">История изменений расширения. Текущая версия — <b>1.3.0</b>. Свежий архив: <a href="Download-anime-videos-v1.3.0.zip" download>Download-anime-videos-v1.3.0.zip</a>.</p>
+      <div class="changelog">
+        <article class="chg current">
+          <div class="chg-head"><h3>1.3.0</h3><span class="chg-tag">текущая версия</span></div>
+          <ul>
+            <li><b>yummyani.me и old.yummyani.me.</b> Старый дизайн поддержан: у страницы есть id тайтла, поэтому расширение определяет аниме точно, без поиска по названию.</li>
+            <li><b>yani.tv.</b> Короткие ссылки вида <code>yani.tv/a12345</code> тоже определяются по id.</li>
+            <li><b>Любые другие сайты.</b> Кнопка «Найти видео на этой странице» в попапе: сканер разбирает разметку любой страницы, находит плееры и потоки.</li>
+            <li><b>Перехватчик потоков с заголовками.</b> Запоминаются Referer, Origin и нестандартные заголовки потока — они подставляются при скачивании, иначе CDN отвечает 403.</li>
+            <li><b>Прямые MP4.</b> Ссылки на <code>.mp4</code> качаются потоком с прогрессом, а не только HLS.</li>
+            <li><b>Исправлено распознавание страниц тайтлов:</b> поддерживаются <code>/anime/&lt;slug&gt;</code>, <code>/catalog/item/&lt;slug&gt;</code>, <code>/a12345</code> и <code>/&lt;id&gt;-&lt;slug&gt;.html</code>; страницы-списки больше не принимаются за страницу аниме.</li>
+            <li><b>Исправлен подбор тайтла по короткому названию</b> — «Реинкарнация безработного» больше не отсекается фильтром похожести.</li>
+            <li><b>Вкладка «Что добавлено»</b> появилась и в менеджере расширения.</li>
+          </ul>
+        </article>
+        <article class="chg">
+          <div class="chg-head"><h3>1.2.0</h3></div>
+          <ul>
+            <li>Появился модуль разбора страниц, общий для менеджера, попапа и фонового скрипта.</li>
+            <li>Менеджер научился работать с плеерами помимо Kodik: то, что нельзя достать из разметки, ловится перехватчиком.</li>
+            <li>Прямые ссылки: <code>.m3u8</code> и <code>.mp4</code> можно вставить руками, качество применяется как ограничение по высоте.</li>
+            <li>Исправлена передача Referer в запросах к плееру и к сегментам потока.</li>
+          </ul>
+        </article>
+        <article class="chg">
+          <div class="chg-head"><h3>1.1.5</h3></div>
+          <ul>
+            <li>Несколько серий качаются параллельно (до 6), лимит настраивается.</li>
+            <li>Докачка с места обрыва: сегменты кэшируются и переживают закрытие вкладки.</li>
+            <li>ZIP собирается в один проход, без временных файлов.</li>
+            <li>Автоповтор упавших серий, лимит скорости и общий backoff при 429/403.</li>
+            <li>Субтитры <code>.vtt</code>, поддержка <code>#EXT-X-BYTERANGE</code>, failover по зеркалам Kodik.</li>
+            <li>Плейлист <code>.m3u</code>, <code>tvshow.nfo</code>, постер, история загрузок и настройки в интерфейсе.</li>
+          </ul>
+        </article>
+        <article class="chg">
+          <div class="chg-head"><h3>1.0.0</h3></div>
+          <ul>
+            <li>Первый выпуск: сезон в один клик, выбор озвучки и качества, отдельные файлы или один ZIP, выбор серий сеткой, шаблоны имён файлов и папок, менеджер загрузок.</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+</div>
 
 <footer>
   <div class="container">
@@ -628,17 +758,19 @@
             </svg>
           </span>
           <span class="name">Download anime videos</span>
-          <span class="ver">v1.0.0</span>
+          <span class="ver">v1.3.0</span>
         </div>
         <div class="foot-note">
-          Расширение для Chromium-браузеров, которое скачивает сезоны аниме с yummyanime.tv в один клик.
+          Расширение для Chromium-браузеров, которое скачивает сезоны аниме в один клик — с yummyanime.tv, yummyani.me,
+          old.yummyani.me, yani.tv и других сайтов (по кнопке «Найти видео на этой странице»).
           Создано только для личного офлайн-просмотра.
         </div>
       </div>
       <div class="foot-links">
         <a href="https://github.com/pythonistaVP/" target="_blank" rel="noopener">Разработчик: @pythonistaVP</a>
         <a href="https://github.com/pythonistaVP/Download-anime-videos" target="_blank" rel="noopener">github.com/pythonistaVP/Download-anime-videos</a>
-        <a href="Download-anime-videos-v1.0.0.zip" download>Скачать .zip</a>
+        <a href="#whats-new">Что добавлено</a>
+        <a href="Download-anime-videos-v1.3.0.zip" download>Скачать .zip</a>
       </div>
     </div>
     <div class="foot-note">
@@ -784,10 +916,26 @@
     let wantedTitle = clean;
     let wantedYear = 0;
     let tv = null;
-    if (/^https?:\/\//i.test(clean) && /yummyanime|yummyani/i.test(clean)) {
-      tv = await fetchYummyTvAnime(clean, { fetchImpl: (url, options) => siteFetch(url, options) });
-      wantedTitle = tv.title || clean;
-      wantedYear = Number(tv.year) || 0;
+    const isLink = /^https?:\/\//i.test(clean);
+    if (isLink && /yummyanime|yummyani|yani\.tv/i.test(clean)) {
+      try {
+        tv = await fetchYummyTvAnime(clean, { fetchImpl: (url, options) => siteFetch(url, options) });
+      } catch (error) {
+        tv = null;
+      }
+      if (tv) {
+        wantedTitle = tv.title || clean;
+        wantedYear = Number(tv.year) || 0;
+      }
+    }
+    state.tv = tv;
+    if (tv && tv.animeId) {
+      setStatus("Это страница старого дизайна — определяю тайтл по её id…");
+      const byId = await api.anime(tv.animeId);
+      if (byId && byId.anime_id) return [{ item: byId, score: 1 }];
+    }
+    if (isLink && (!tv || !tv.title)) {
+      throw new Error("не удалось прочитать страницу по ссылке — вставьте ссылку именно со страницы аниме или введите название");
     }
     setStatus("Каталог отвечает, подбираю лучшее совпадение…");
     const results = await api.search(wantedTitle);
@@ -857,15 +1005,15 @@
   function renderDubs() {
     const groups = state.groups;
     els.dubsTitle.textContent = "Озвучки и студии, которые есть на сайте";
-    els.dubsNote.textContent = groups.length ? groups.length + " " + plural(groups.length, "вариант", "варианта", "вариантов") + " · пунктиром — недоступны для скачивания" : "";
+    els.dubsNote.textContent = groups.length ? groups.length + " " + plural(groups.length, "вариант", "варианта", "вариантов") + " · пунктиром — только через перехватчик" : "";
     els.dubs.innerHTML = "";
     groups.forEach((group, index) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "dub" + (group.supported ? "" : " off") + (state.dub === group ? " on" : "");
       button.dataset.i = String(index);
-      button.title = group.supported ? "Нажмите, чтобы посмотреть доступные качества" : "Эта озвучка отдаётся через плеер alloha — прямых ссылок нет";
-      button.innerHTML = esc(group.dubbing) + '<span class="n">' + group.episodeCount + " " + plural(group.episodeCount, "серия", "серии", "серий") + (group.supported ? "" : " · нет") + "</span>";
+      button.title = group.supported ? "Нажмите, чтобы посмотреть доступные качества" : "Эта озвучка отдаётся через закрытый плеер (alloha): в расширении её ловит перехватчик";
+      button.innerHTML = esc(group.dubbing) + '<span class="n">' + group.episodeCount + " " + plural(group.episodeCount, "серия", "серии", "серий") + (group.supported ? "" : " · перехватчик") + "</span>";
       if (group.supported) {
         button.addEventListener("click", () => selectDub(group, button));
       }
@@ -926,6 +1074,56 @@
       "<div>Вся озвучка — " + episodes + " " + plural(episodes, "серия", "серии", "серий") + ": <b>≈ " + formatBytes(total) + "</b></div>" +
       "<div>Имя файла будет таким:<br><span class=\"fname\">" + esc(fileName) + "</span></div>";
   }
+
+  /* ---------- вкладки «Расширение» / «Что добавлено» ---------- */
+  const VIEWS = ["viewMain", "viewNews"];
+  const VIEW_KEY = "dav-site:view";
+  const NEWS_KEY = "dav-site:news-seen";
+
+  function markNewsSeen() {
+    try { localStorage.setItem(NEWS_KEY, "1"); } catch (e) {}
+    const badge = document.getElementById("newsBadge");
+    if (badge) badge.hidden = true;
+  }
+  function showView(id, remember = true) {
+    if (VIEWS.indexOf(id) === -1) return;
+    document.querySelectorAll(".tab[data-view]").forEach((tab) => {
+      const on = tab.dataset.view === id;
+      tab.classList.toggle("on", on);
+      tab.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    VIEWS.forEach((name) => {
+      const node = document.getElementById(name);
+      if (node) node.hidden = name !== id;
+    });
+    if (remember) { try { localStorage.setItem(VIEW_KEY, id); } catch (e) {} }
+    if (id === "viewNews") markNewsSeen();
+  }
+  (function initTabs() {
+    const tabs = document.querySelectorAll(".tab[data-view]");
+    if (!tabs.length) return;
+    tabs.forEach((tab) => tab.addEventListener("click", () => {
+      showView(tab.dataset.view);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }));
+    let seen = false;
+    try { seen = localStorage.getItem(NEWS_KEY) === "1"; } catch (e) {}
+    if (seen) markNewsSeen();
+    const newsHash = (value) => ["whats-new", "whatsnew", "changelog", "news"].indexOf(String(value || "").replace(/^#/, "").toLowerCase()) !== -1;
+    let start = newsHash(location.hash) ? "viewNews" : "";
+    if (!start) { try { start = localStorage.getItem(VIEW_KEY) || ""; } catch (e) {} }
+    showView(VIEWS.indexOf(start) !== -1 ? start : "viewMain", false);
+    document.addEventListener("click", (event) => {
+      const link = event.target && event.target.closest ? event.target.closest('a[href^="#"]') : null;
+      if (!link) return;
+      const target = document.getElementById(link.getAttribute("href").slice(1));
+      const main = document.getElementById("viewMain");
+      if (target && main && main.contains(target)) showView("viewMain");
+    });
+    window.addEventListener("hashchange", () => {
+      if (newsHash(location.hash)) showView("viewNews");
+    });
+  })();
 
   els.form.addEventListener("submit", async (event) => {
     event.preventDefault();
